@@ -1,0 +1,76 @@
+<?php
+
+$servername = "localhost";
+$username = "kwtacompower";
+$password = "Tun&#Krg*89";
+$dbname = "survdb";
+
+// Create connection
+$conn = new mysqli($servername, $username, $password, $dbname);
+//Get Columns
+$tablequery="SHOW COLUMNS FROM kwta_survey_937772 ";
+$result_table =mysqli_query($conn, $tablequery);
+//$age = array("Peter"=>35, "Ben"=>37, "Joe"=>43);
+/*print_r($age);Array ( [Peter] => 35 [Ben] => 37 [Joe] => 43 )
+exit();*/
+if (!$result_table) {
+    echo "DB Error, could not list tables\n";
+    echo 'MySQL Error: ' . mysqli_error($conn);
+    exit;
+}
+$result = mysqli_query($conn,"SHOW COLUMNS FROM kwta_survey_463249") or   die(mysqli_error());
+$columns = array();
+$exclude=array("id","token","submitdate","lastpage","seed");
+while ($row = mysqli_fetch_array($result)) {
+    if (!in_array($row[0], $exclude)) {
+    $columns[] = $row[0];
+}
+
+}
+//var_dump($columns);
+$keys = array();
+$values = array();
+foreach ($columns as $column) {
+    //$value = trim($_POST[$column]);
+    //$value = mysqli_real_escape_string($value);
+    $value="t";
+    $keys[] = "`{$column}`";
+    $values[] = "'{$value}'";
+}
+$query = "INSERT INTO kwta_survey_463249(" . implode(",", $keys) . ") 
+          VALUES (" . implode(",", $values) . ");";
+$query2 = "INSERT INTO kwta_survey_463249 (" . implode(",", $keys) . ") VALUES (".implode(",", $values).");";
+print_r($query2);
+
+if(mysqli_query($conn,$query2)){
+
+    echo 'Data Submit Successfully';
+
+}
+else{
+
+    echo 'Try Again';
+
+}
+mysqli_close($conn);
+exit();
+
+
+
+
+
+$sql="insert into kwta_survey_519424(lastpage,startlanguage,seed,519424X238X3161,519424X238X3179) values('1','en' ,'1','Testing','Mobile')";
+
+
+if(mysqli_query($conn,$sql)){
+
+    echo 'Data Submit Successfully';
+
+}
+else{
+
+    echo 'Try Again';
+
+}
+mysqli_close($conn);
+?>
