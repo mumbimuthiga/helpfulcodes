@@ -1,0 +1,440 @@
+
+<style>
+   td, label{
+        font-weight: bold;
+        font-size: medium;
+    }
+</style>
+<div class="container-fluid">
+    <?php $this->load->view('reporting/pages/head_info'); 
+
+    ?>
+
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="card">
+                <div class="card-body">
+                  
+                
+                    <div class="row row-margin">
+                        <div class="col-sm-10">
+                            <button class="btn btn" data-toggle="collapse" data-target="#demo" style="color: white;background-color: #00529B">
+                                Apply Leave <i class=""></i>
+                            </button>
+                        </div>
+
+                    </div>
+                    <hr>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div id="demo" class="collapse">
+                                <form action="<?php echo base_url('Bookings/submitleave') ;?>" method="POST" id="education_form"  enctype="multipart/form-data">
+                                    <div class="row" style="background: white;">
+                                        <div class="col-sm-6">
+                                          
+                                            <div class="form-group">
+                                                <label style="font-size: medium;font-weight: bold">
+                                                   Leave Type
+                                                </label>
+                                                <select class="form-control" id="typesleave" name="leavetypes" onchange="getLeaveTypes(this.value)">
+                                           
+                                                    <?php foreach($leavestypes as $leavetype){ ?>
+                                                    <option value="<?php echo $leavetype->id;?>"><?php echo $leavetype->leave_types;?></option>
+                                                    <?php } ?>
+                                                </select>
+                                              
+                                                <?php
+                                                //$data=getLeaveTypes();
+                                                // do_leaves_drop_down("leavetypes","leavetypes",""); ?>
+                                               
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-3">
+                                            <div class="form-group">
+                                                <label style="font-size: medium;font-weight: bold">
+                                                  Entitled Days
+                                                 
+                                                </label>
+                                                <input type="text" readonly name="entitleddays" id="edays" value=""   class="form-control" autocomplete="off" required onchange="getenddate()">
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-3">
+                                            <div class="form-group">
+                                               <label style="font-size: medium;font-weight: bold">
+                                                Remaining Days
+                                               </label>
+                                               <input type="text" readonly name="remaindays" id="rdays" value=""  class="form-control" autocomplete="off" required onchange="getenddate()">
+                                           </div>
+                                       </div>
+                                        <div class="col-sm-6"> 
+                                            <div class="form-group">
+                                                <label style="font-size: medium;font-weight: bold">
+                                                    Start Date
+                                                </label>
+                                                <input type="date" name="startdate" id="startdate"   class="form-control" autocomplete="off" required onchange="getenddate()">
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <div class="form-group">
+                                                <label style="font-size: medium;font-weight: bold">
+                                                  End Date
+                                                </label>
+                                                <input type="date" name="enddate" id="enddate" class="form-control" autocomplete="off">
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <div class="form-group">
+                                                <label style="font-size: medium;font-weight: bold">
+                                                   Reliever
+                                                </label>
+                                                <?php 
+                                               // $user=get_current_user_logged_in();
+                                                //print_r("User".$user);
+                                                do_relievers_drop_down("reliever","reliever","",2); ?>
+                                               
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-12" style="border-right: solid 1px lightgrey">
+                                            <label style="font-size: medium;font-weight: bold">
+                                                Description
+                                            </label>
+                                            <div class="form-group">
+
+                                                <textarea rows="5" name="description" id="desc" class="md-textarea form-control "  style="width: 100%; max-width: 100%;"   autocomplete="off"></textarea>
+
+                                            </div>
+                                        </div>
+
+                                        <div class="col-sm-12">
+                                            <br>
+                                            <div class="form-group">
+
+                                                <button class="btn btn pull-right" style="margin-top: 8px; color: white;background-color: #00529B;">
+                                                    Save
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div id="demos">
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="table-responsive m-t-10">
+                                            <table id="myTable" class="table table-bordered table-striped">
+                                                <thead>
+                                                <tr>
+                                                    <th>#</th>
+                                                    <th>Leave Type</th>
+                                                    <th>Start Date</th>
+                                                    <th>End Date</th>
+                                                    <th>Reliever</th>
+                                                    <th>Status</th>
+                                                    <th>Action</th>
+
+
+                                                </tr>
+                                                </thead>
+                                                <tbody>
+                                                <?php
+                                                $n =1;
+                                                foreach ($leaves as $row) {
+                                                    $timestamp=strtotime($row->start_date);
+                                                    $enddate=strtotime($row->end_date);
+
+
+                                                    ?>
+                                                    <tr>
+                                                        <td><?php echo $n; ?></td>
+                                                        <td><?php echo get_leave_name($row->leave_type); ?></td>
+                                                        <td><?php echo  date("d-m-Y", $timestamp); ?></td>
+                                                        <td><?php echo  date("d-m-Y", $enddate); ?></td>
+                                                        <td><?php echo $row->reliever_name ?></td>
+                                                        <td><span class="badge badge-success"><?php echo get_status_name($row->status) ?></span></td>
+                                          
+
+                                                        <td>
+                                                            <div class="dropdown">
+                                                                <button class="btn-sm btn-success dropdown-toggle" type="button" data-toggle="dropdown" style="color: white;background-color: #00529B">Action
+                                                                    <span class="caret"></span></button>
+                                                                <ul class="dropdown-menu">
+
+                                                                    <a class="dropdown-item" data-toggle="modal" data-target="#moreModal<?php echo $row->id ?>" id="#moreModal"<?php echo  $row->id; ?> >
+                                                                        <span class="glyphicon glyphicon-eye-open"></span>View Details</a>
+                                                                    <?php if($row->status == 1){?>
+                                                                        <li><a class="dropdown-item" onclick="deactivate_leave(<?php echo $tmp->id; ?>,'<?php  ?>');">Delete</a>
+
+                                                               <?php } ?>
+                                                                </ul>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+
+                                                    <?php
+                                                    $n++;
+
+
+                                                ?>
+                                                <div class="modal fade" id="moreModal<?php echo $row->id ?>" tabindex="-1" role="dialog" aria-labelledby="#document_modal_title" aria-hidden="true">
+
+                                                    <div class="modal-dialog modal-lg" role="document">
+                                                        <div class="modal-content">
+                                                            <div class="modal-header">
+                                                                <h4 class="modal-title" id="exampleModalLabel">Details on Leave Application</h4>
+                                                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                                    <span aria-hidden="true">&times;</span>
+                                                                </button>
+                                                            </div>
+                                                            <div class="modal-body">
+                                                                <div class="row">
+                                                                    <div class="col-sm-12">
+                                                                        <form action="<?php echo base_url('enrollment/bookservice_client/') ;?>" method="post" id="enqry_form"><?php ?>
+                                                                            <div class="row">
+                                                                                <div class="col-sm-6" style="border-right: solid 1px lightgrey">
+                                                                                    <!--                                    <input type="hidden" class="form-control" value="--><?php //echo $train_detail->id;?><!--" name="training_id" required ">-->
+                                                                                    <input type="hidden" class="form-control" id="did" name="service_id" value="<?php echo $row->id;?>" required ">
+                                                                                    <div class="form-group">
+                                                                                        <label for="training">
+                                                                                           Leave Type
+                                                                                        </label>
+                                                                                        <input type="text" class="form-control" value="<?php echo get_leave_name($row->leave_type);?>" name="service_name" readonly autocomplete="off">
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div class="col-sm-6" style="border-right: solid 1px lightgrey">
+                                                                                    <input type="hidden" class="form-control" id="did" name="did" ">
+                                                                                    <div class="form-group">
+                                                                                        <label>
+                                                                                            Reliever Name
+                                                                                        </label>
+                                                                                        <input type="text" class="form-control" readonly value="<?php echo $row->reliever_name;?>" name="venue" required autocomplete="off">
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div class="col-sm-6" style="border-right: solid 1px lightgrey">
+                                                                                    <div class="form-group">
+                                                                                        <label for="date_to">
+                                                                                            Start Date
+                                                                                        </label>
+                                                                                        <input type="text" name="startdate" id="sdate" readonly value="<?php echo date('d-m-Y' ,strtotime($row->start_date)); ?>" id="available_from" class="form-control" autocomplete="off" required >
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div class="col-sm-6" style="border-right: solid 1px lightgrey">
+                                                                                    <div class="form-group">
+                                                                                        <label for="date_to">
+                                                                                            End Date
+                                                                                        </label>
+                                                                                        <input type="text" name="enddate" readonly value="<?php echo date('d-m-Y' ,strtotime($row->end_date)); ?>" id="available_from" class="form-control" autocomplete="off" required >
+                                                                                    </div>
+                                                                                </div>
+
+                                                                            </div>
+                                                                            <div class="row">
+                                                                                <div class="col-sm-12" style="border-right: solid 1px lightgrey">
+                                                                                    <label>
+                                                                                        Description
+                                                                                    </label>
+                                                                                    <div class="form-group">
+
+                                                                                        <textarea rows="5" name="description" id="desc"  style="width: 100%; max-width: 100%;"  readonly autocomplete="off"><?php echo $row->description;?></textarea>
+
+                                                                                    </div>
+                                                                                </div>
+
+
+
+                                                                            </div>
+                                                                            <div class="row">
+                                                                                <div class="col-sm-12">
+                                                                                    <hr>
+                                                                                    <div class="text-center">
+                                                                                        <div class="form-group">
+                                                                                            <div class="text-center">
+                                                                                                <button type="button" class="btn btn-inverse" data-dismiss="modal">Close</button>
+
+                                                                                                <?php }?>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        </form>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                </tbody>
+
+                                                <tfoot>
+                                                <tr>
+                                                    <th>#</th>
+                                                    <th>Leave Type</th>
+                                                    <th>Start Date</th>
+                                                    <th>End Date</th>
+                                                    <th>Reliever</th>
+                                                    <th>Status</th>
+                                                    <th>Action</th>
+                                                </tr>
+                                                </tfoot>
+
+                                            </table>
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    
+    function deactivate_leave(id,name)
+    {
+        console.log(1);
+       
+        swal({
+                title: "Confirm",
+                text: "Are you sure you want to delete the application '"+name+"' ? Process is irreversible" ,
+                type: "info",
+                showConfirmButton: true,
+                confirmButtonClass: "btn-primary",
+                confirmButtonText: "Yes, Send!",
+                closeOnConfirm: false,
+                showCancelButton: true
+            },
+            function () {
+                $.ajax({
+                    type: "POST",
+                    url: "<?php echo base_url('Bookings/disableapplication/'); ?>" + id,
+                    beforeSend: function () {
+
+                    },
+                    success: function (res)
+                    {
+                        if(res === '1')
+                        {
+                            swal({
+                                title: "Error",
+                                text: "Unable to Send.",
+                                type: "error",
+                                showConfirmButton: true,
+                                confirmButtonText: "Ok",
+                                confirmButtonColor: btn_color,
+                                showCancelButton: false
+                            });
+
+                            return false;
+                        }
+                        else
+                        {
+                            swal({
+                                title: "Successful",
+                                text: "Leave Application Succesfully Deleted!",
+                                type: "success",
+                                showConfirmButton: true,
+                                showCancelButton: false
+                            }, function () {
+                                window.location.href=window.location.href;
+                            });
+                        }
+
+                    }
+                });
+            });
+
+    }
+</script>
+
+
+<script src="<?php echo base_url() ?>assets/node_modules/jquery/jquery.min.js"></script>
+<script>
+function getLeaveTypes(str){
+  
+    if (str.length == 0) {
+            document.getElementById("edays").innerHTML = "";
+            return;
+        } else {
+            var xmlhttp = new XMLHttpRequest();
+            xmlhttp.onreadystatechange = function() {
+                if (this.readyState == 4 && this.status == 200) {
+                    var edays= document.getElementById("edays");
+                    var rdays=document.getElementById("rdays");
+                    const newdata=[this.responseText]
+                    
+                    const result=new String(newdata);
+                    const f=result.split(' ');
+                    const entitleddays=f[0];
+                    const useddays=f[1];
+                    const remaindays=f[0]-f[1];
+                   
+                    edays.value=entitleddays;
+                    rdays.value=remaindays;
+
+                
+                   
+                }
+            }
+
+            xmlhttp.open("GET", "http://localhost/leave/Bookings/getEntitledDays/"+str, true);
+            xmlhttp.send();
+        }
+
+    }
+  
+</script>
+
+    
+
+<script>
+function showLeaveType(str) {
+  if (str.length == 0) {
+    document.getElementById("leavedata").innerHTML = "";
+    return;
+  } else {
+    var xmlhttp = new XMLHttpRequest();
+    xmlhttp.onreadystatechange = function() {
+      if (this.readyState == 4 && this.status == 200) {
+        document.getElementById("leavedata").innerHTML = this.responseText;
+      }
+    };
+    xmlhttp.open("GET", "" + str, true);
+    xmlhttp.send();
+  }
+}
+</script>
+
+
+<script>
+    
+    function getenddate(){
+        var datefrom = document.getElementById("startdate").value;
+       // console.log(datefrom);
+       document.getElementsByName("enddate")[0].setAttribute('min', datefrom);
+
+    }
+</script>
+
+<script>
+    /*date from should not be more than today*/
+    var today = new Date().toISOString().split('T')[0];
+    document.getElementsByName("startdate")[0].setAttribute('min', today);
+
+
+</script>
+
+
+
