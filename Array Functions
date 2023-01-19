@@ -1,0 +1,5 @@
+Search if element is contained in an array (in-array)
+
+ $role_array=explode(',',$role);
+ if (in_array("7", $role_array))
+ {echo 'Match Found';}
