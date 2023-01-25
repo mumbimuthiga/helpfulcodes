@@ -38,7 +38,161 @@ https://stackoverflow.com/questions/70167460/disable-weekends-and-specific-dates
   beforeShowDay: $.datepicker.noWeekends
  }).val();
 
- 
+</script>
 
- 
+<script>
+    function calculatedDays(enddate,startdate){
+
+    var today = enddate;
+    today = new Date(today.split('/')[2],today.split('/')[1]-1,today.split('/')[0]);
+    var date2 = startdate;
+    date2 = new Date(date2.split('/')[2],date2.split('/')[1]-1,date2.split('/')[0]);
+    var timeDiff = Math.abs(today.getTime() - date2.getTime());
+    var diffDays = Math.ceil(timeDiff / (1000 * 3600 * 24)); 
+    var days= Math.ceil(timeDiff / (1000 * 3600 * 24)); 
+  
+   // return diffDays +1;
+
+    //New Code-Subtract weekends
+
+// Subtract two weekend days for every week in between
+var weeks = Math.floor(days / 7);
+days = days - (weeks * 2);
+
+// Handle special cases
+var startDay = date2.getDay();
+var endDay = today.getDay();
+
+// Remove weekend not previously removed.   
+if (startDay - endDay > 1)         
+    days = days - 2;      
+
+// Remove start day if span starts on Sunday but ends before Saturday
+if (startDay == 0 && endDay != 6) {
+    days = days - 1;  
+}
+
+// Remove end day if span ends on Saturday but starts after Sunday
+if (endDay == 6 && startDay != 0) {
+    days = days - 1;
+}
+return days +1;
+    //New Code
+
+    }
+  
+
+</script>
+
+//Get Days excluding holidays and weekends
+<script>
+    function calculatedDays(enddate,startdate){
+
+    var today = enddate;
+    console.log('Reult of date arraybbh',today);
+    today = new Date(today.split('/')[2],today.split('/')[1]-1,today.split('/')[0]);
+    var date2 = startdate;
+    date2 = new Date(date2.split('/')[2],date2.split('/')[1]-1,date2.split('/')[0]);
+    var timeDiff = Math.abs(today.getTime() - date2.getTime());
+    var diffDays = Math.ceil(timeDiff / (1000 * 3600 * 24)); 
+    var days= Math.ceil(timeDiff / (1000 * 3600 * 24))+1; 
+
+    //Start Date
+    var datestartdate =startdate;
+    var datearraystart = datestartdate.split("/");
+    var newdatestart = datearraystart[1] + '/' + datearraystart[0] + '/' + datearraystart[2];
+    const doc=new Date(newdatestart);
+    var startdateday=doc.getDay();
+    console.log('New dates start result',newdatestart);
+    console.log('New dates start result Day partiv',doc.getDay());
+
+    //End date
+    var dateenddate =enddate;
+    var datearrayend = dateenddate.split("/");
+    var newdateend = datearrayend[1] + '/' + datearrayend[0] + '/' + datearrayend[2];
+    const doc_end=new Date(newdateend);
+    var enddateday=doc_end.getDay();
+    console.log('New dates End result',newdateend);
+    console.log('New dates start result Day partiv',doc_end.getDay());
+    var days;
+
+
+    
+  
+    //Code to remove public hoolidays
+    var hdayar = ["4/7/2023", "4/10/2023","5/1/2023","6/1/2023" ,"6/29/2023","10/10/2023","10/20/2023","12/12/2023","25/12/2023","26/12/2023"];
+
+   // var start = $("#start_date").val();
+    var start=date2;
+    var end=today;
+    //end = $("#end_date").val();
+    console.log('End Result',end);
+   
+    currentDate = start;
+    console.log('Start Result',currentDate);
+    between = [];
+
+while (currentDate <= end) {
+    between.push(new Date(currentDate));
+    currentDate.setDate(currentDate.getDate() + 1);
+    
+}
+console.log('between dates', between);
+
+console.log('Days result',days);
+var between_array=[];
+for(var i=0; i<between.length; i++){
+    console.log('Testing dates2',Date.parse(between[i]));
+    var d = new Date(Date.parse(between[i])),
+        month = '' + (d.getMonth() + 1),
+        day = '' + d.getDate(),
+        year = d.getFullYear();
+        myDate = new Date(d).toLocaleDateString('en-US');
+
+    
+    var day_document=new Date(myDate);
+    var day_doc=day_document.getDay();
+    console.log('Day Doc',day_document.getDay());
+    console.log('Testing My Date result',myDate);
+    
+    between_array.push(myDate);
+  
+    //console.log(findCommonElement(between_array ,hdayar));
+
+    if(day_doc===0){
+        console.log('Days before sunday',days);
+        days=days-1;
+        console.log('Days after',days);
+    }
+     if(day_doc===6){
+        console.log('Days before satrurday',days);
+        days=days-1;
+        console.log('Days after',days);
+    }
+    console.log('Testing array Hydar',hdayar[i]);
+  
+   
+}
+for(let i = 0; i < between_array.length; i++) {
+              
+              // Loop for array2
+              for(let j = 0; j < hdayar.length; j++) {
+                   
+                  // Compare the element of each and
+                  // every element from both of the
+                  // arrays
+                  if(between_array[i] === hdayar[j]) {
+                   
+                      // Return if common element found
+                      days=days-1;
+                      //return days;
+                  }
+              }
+          }
+return days;
+
+
+    }
+  
+
 </script>
