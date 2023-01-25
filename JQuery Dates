@@ -25,3 +25,20 @@ https://stackoverflow.com/questions/70167460/disable-weekends-and-specific-dates
   });
 });
  </script>
+
+
+
+//Disable weekends only
+<script>
+    let dateToday = new Date(); 
+    
+  
+ $('#start_date').datepicker({ dateFormat: 'dd/mm/yy',
+  minDate: dateToday,
+  beforeShowDay: $.datepicker.noWeekends
+ }).val();
+
+ 
+
+ 
+</script>
