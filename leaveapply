@@ -1,0 +1,1782 @@
+<!-- Page Heading -->   
+
+
+<div class="card shadow mb-4">
+
+<div class="row">
+<div class="col-md-3 m-4">
+        <button class="btn btn btnleave" onclick=applyleave() id="btnapplyleave">Apply Leave</button>
+    </div> 
+</div>
+<?php
+        if(isset($_GET['pesan'])){
+            if($_GET['pesan'] == "mo_days"){
+                echo '<div class="alert alert-danger text-left" role="alert"><strong>Leave Application</strong><br>You have Applied for more days than what you are entitled to.</div>';
+            } else if($_GET['pesan'] == "logout"){
+                echo '<div class="alert alert-success text-left" role="alert">Logout Succesful!</div>';
+            }
+            /* else if($_GET['pesan'] == "belumlogin"){
+                echo '<div class="alert alert-warning text-left" role="alert">Session Expired!Login Again</div>';
+            }*/
+        }
+        ?>
+    <div class="card-body">
+        <form action="<?php echo base_url().'admin/applyleave' ?>" id="frmapplication" method="post" enctype="multipart/form-data">
+        <div class="row" >
+        <div class="col-sm-12 isa_info" id="tonote">
+                    <div class="form-group">
+                        <label class="form-label tonotelabel">TO NOTE</label>
+                        <div class="">
+                            <p id="leavenarration"></p>
+                        </div>
+                    </div>
+                
+       
+            </div>
+            
+        <div class="col-sm-6" style="border-right: solid 1px lightgrey">
+        
+            <div class="form-group ">
+                <label class="form-label">Leave Type</label> <span style="color: red;">*</span>
+                
+                  
+                <select class="form-control" autocomplete="off" name="leavetype" id="leavetype" required onchange=getLeaveTypedays(this.value)>
+                    <option value="0">Select Leave Type</option>
+                <?php foreach($leavetypes as $leavetype){?>
+                    <option value="<?php echo $leavetype->id; ?>"><?php echo $leavetype->leavename ; ?></option>  <?php }?>
+                    
+                </select>
+                
+                <p id="remainingdays"class="" style="color: #9F6000;background-color: #FEEFB3;border-color: #9F6000;"></p>
+                <p id="remain" style="display:none"></p>
+                <input id="days_remain" name="days_remain" style="display:none"></input>
+                <input id="maximum_date" value="<?php echo $maximumdate ?>" name="maximumdate" type="hidden"></input>
+              
+               
+                </div>
+                <?php echo form_error('holidayname'); ?>
+            </div>
+            <div class="col-sm-6" style="border-right: solid 1px lightgrey">
+                    <div class="form-group">
+                        <label class="form-label">Entitled/Earned Days</label>
+                        <div class=""><input type="text" class="form-control" readonly placeholder=""   id="entitled_days" name="entitleddays">
+                   
+                        
+                    </div>
+                        <?php echo form_error('date'); ?>
+                    </div>
+                  
+                  
+                </div>
+          
+            <div class="col-sm-6" id="attachdocument" style="border-right: solid 1px lightgrey;display:none">
+                    <div class="form-group">
+                        <label class="form-label" id="labelattachdocument">Attach Document</label> <span style="color: red;">*</span>
+                        <div class=""><input type="file" autocomplete="off"  class="form-control" id="document" name="document"></div>
+                    
+                    </div>
+                </div>
+                <div class="col-sm-6" id="carersboxes" style="display:none;border-right: solid 1px lightgrey">
+                <label for="">Beneficiaries as per employee form</label>
+                <div id="cboxes"><input type="text" autocomplete="off"  class="form-control" id="document" name="document"></div>
+              
+                </div>
+
+                <div class="col-sm-6" style="border-right: solid 1px lightgrey">
+                    <div class="form-group">
+                        <label class="form-label">Start Date </label> <span style="color: red;">*</span>
+                        <div class=""><input type="text" class="form-control" placeholder="dd/mm/yyyy" autocomplete="off" required   id="start_date" name="start_date" >
+                     <input type="radio"checked name="startdatemorning" id="start_datemorning" value="fullday">Full Day</input>
+                      <input type="radio" name="startdatemorning" id="start_datemorning" value="morning" >morning</input>
+                       <input type="radio" name="startdatemorning" id="start_datemorning" value="afternoon">Afternoon</input>
+                        
+                    </div>
+                        <?php echo form_error('date'); ?>
+                    </div>
+                  
+                  
+                </div>
+              
+                <div class="col-sm-6" style="border-right: solid 1px lightgrey">
+                        <div class="form-group ">
+                            <label class="form-label">End Date </label>
+                          
+                            <div class="">
+                                <input type="text" class="form-control" autocomplete="off" required  placeholder="dd/mm/yyyy"   id="end_date" name="end_date" onchange="getNumberofDays()">
+                                <input type="radio" class="radios" checked  name="enddatemorning" id="end_datemorning" value="fullday" >Full Day</input>
+                                <input type="radio" class="radios" name="enddatemorning" id="end_datemorning" value="morning" >morning</input>
+                                <input type="radio"  class="radios" name="enddatemorning" id="end_datemorning" value="afternoon" >Afternoon</input>
+                                    
+                            </div>
+                            <?php echo form_error('date'); ?>
+                         </div>
+
+                </div>
+                <div class="col-sm-6" style="border-right: solid 1px lightgrey">
+                        <div class="form-group ">
+                            <label class="form-label">No Of Days</label> <span style="color: red;">*</span>
+                            <div class=""><input type="number" autocomplete="off"  readonly class="form-control" id="noofdays" name="days" step=".01" ></div>
+                            <?php //echo form_error('date'); ?>
+                            <p id="limitvalue" style="color:red;display:none">The Value is higher than the remaining days</p>
+                        </div>
+
+                </div>
+              
+                <div class="col-sm-6" style="border-right: solid 1px lightgrey">
+                        <div class="form-group ">
+                            <label class="form-label">Reliever</label><span style="color: red;">*</span>
+                                <div class="">
+                                
+                                <input type="text" class="form-control" id="operator_name" name="reliever" oninput="showHint(this.value)" required>
+                                <div class="help-block" id="txtHint" style="color: red; font-weight:bold;">  </div>  
+                                
+ 
+                                 <!--<select class="form-control" name="reliever" autocomplete="off"  required>
+                                    <option value="0">Select Reliever</option>
+                                    <?php // foreach($relievers as $reliever){?>
+                                        <option value="<?php //echo $reliever->id; ?>"><?php //echo $reliever->name .' '.' (' .$reliever->staff_number .')' ; ?></option>  <?php // }?>
+                                        
+                                    </select> !-->
+                            
+                                </div>
+                            <?php echo form_error('holidayname'); ?>
+                        </div>
+
+                </div>
+                <div class="col-sm-6"style="border-right: solid 1px lightgrey">
+                    <div class="form-group">
+                    <label class="form-label">Reason</label>
+                    <div class="">
+                        <textarea class="form-control" autocomplete="off"  name="reason" id="reason"></textarea>
+                    </div>
+                    <?php echo form_error('date'); ?>
+                </div>
+
+                </div>
+                <div class="col-sm-6"style="border-right: solid 1px lightgrey">
+                    <div class="form-group">
+                    <label class="form-label">Hand Over Notes</label>
+                    <div class="">
+                        <textarea class="form-control" autocomplete="off"  name="handover" id="handover"></textarea>
+                    </div>
+                    
+                </div>
+
+                </div>
+             
+
+        </div>
+ 
+            <div class="form-group ">
+                <div class="col-sm-12">
+                    <button type="submit" onclick="submitValues()" class="btn btn-primary pull-right btnsubmit">Submit</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+<!-- Display Holidays !-->
+<div class="card shadow mb-4">
+<div class="d-sm-flex align-items-center justify-content-between m-4">
+    <h3 class="h3 mb-0 text-gray-800"> My Leave Applications</h3>
+</div>
+    <div class="card-body">
+    <div class="table-responsive">
+            <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                <thead>
+                    <tr>
+                        <th>#</th> 
+                        <th>Leave Type</th>
+                        <th>Application Code</th>
+                        <th>Start Date</th>
+                      
+                        <th>End Date</th>
+                        <th>No of days</th>
+                        <th>Reliever</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                <?php 
+                $no=1;
+                foreach($applications as $k){
+                ?>
+                    <tr>
+                        <td><?php echo $no++; ?></td>
+                        <td><?php echo getLeavetypes($k->leavetype) ?></td>
+                        <td><?php echo $k->application_no ?></td>
+                        <td><?php if($k->startdate=='0000-00-00'){echo '';}
+                                else{ 
+                                $startdate=$k->startdate;
+                                $start_date=str_replace("/","-",$startdate);
+                                echo date('d M, Y ', strtotime($start_date));
+                             
+                             } ?></td>
+                      
+                        <td><?php if($k->enddate=='0000-00-00'){echo '';}
+                                else{ 
+                                $enddate=$k->enddate;
+                                $end_date=str_replace("/","-",$enddate);
+                                echo date('d M, Y', strtotime($end_date));
+                             
+                             } ?></td>
+                               <td><?php echo $k->days ?></td>
+                        <td><?php echo getNames($k->reliever) ?></td>
+                        <td>
+                             <?php if($k->reliever_status==0 && $k->linemanager_status==0 && $k->cd_status==0 && $k->hr_status==0){?>
+                                    <span class="badge badge-warning"><?php echo 'Pending Reliever Accept';?></span>
+                              <?php }else if($k->reliever_status==1 && $k->linemanager_status==0 && $k->cd_status==0 && $k->hr_status==0){?>
+                                <span class="badge badge-success"><?php echo 'Accepted by reliever';?></span>
+
+                              <?php }else if($k->reliever_status==2 && $k->linemanager_status==0 && $k->cd_status==0 && $k->hr_status==0){?>
+                                <span class="badge badge-danger"><?php echo 'Declined by reliever';?></span>
+
+                              <?php }else if($k->reliever_status==1 && $k->linemanager_status==0 && $k->cd_status==0 && $k->hr_status==0){?>
+                                <span class="badge badge-warning"><?php echo 'Pending Approval by Line Manager';?></span>
+
+                              <?php }else if($k->reliever_status==1 && $k->linemanager_status==1 && $k->cd_status==0 && $k->hr_status==0){?>
+                                <span class="badge badge-success"><?php echo 'Approved by Line Manager';?></span>
+
+                              <?php }else if($k->reliever_status==1 && $k->linemanager_status==2 && $k->cd_status==0 && $k->hr_status==0){?>
+                                <span class="badge badge-danger"><?php echo 'Rejected by Line Manager';?></span>
+
+                              <?php }else if($k->reliever_status==1 && $k->linemanager_status==1 && $k->cd_status==0 && $k->hr_status==0){?>
+                                <span class="badge badge-warning"><?php echo 'Pending Approval by Campus Director';?></span>
+
+                              <?php }else if($k->reliever_status==1 && $k->linemanager_status==1 && $k->cd_status==1 && $k->hr_status==0){?>
+                                <span class="badge badge-success"><?php echo 'Approved by Campus Director';?></span>
+
+                              <?php }else if($k->reliever_status==1 && $k->linemanager_status==1 && $k->cd_status==2 && $k->hr_status==0){?>
+                                <span class="badge badge-danger"><?php echo 'Rejected by Campus Director';?></span>
+
+                              <?php }else if($k->reliever_status==1 && $k->linemanager_status==1 && $k->cd_status==1 && $k->hr_status==0){?>
+                                <span class="badge badge-warning"><?php echo 'Pending Approval by Human Resource';?></span>
+
+                              <?php }else if($k->reliever_status==1 && $k->linemanager_status==1 && $k->cd_status==1 && $k->hr_status==1){?>
+                                <span class="badge badge-success"><?php echo 'Approved by Human Resource';?></span>
+
+                              <?php }else if($k->reliever_status==1 && $k->linemanager_status==1 && $k->cd_status==1 && $k->hr_status==2){?>
+                                <span class="badge badge-danger"><?php echo 'Rejected by Human Resource';?></span>
+
+                              <?php }?>
+                            
+                           
+                            
+                        </td>
+                      
+                        
+                      
+                        <td>
+                            <center>
+                                    <div class="btn-group">
+                                    <button type="button" class="btn btn btnfolder1">Action</button>
+                                    <button type="button" class="btn btn btnfolder dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        <span class="sr-only">Toggle Dropdown</span>
+                                    </button>
+                                    <div class="dropdown-menu">
+                                        <?php if($k->reliever_status==2 && $k->linemanager_status==0 && $k->cd_status==0 && $k->hr_status==0 || ($k->reliever_status==1 && $k->linemanager_status==2 && $k->cd_status==0 && $k->hr_status==0) || $k->reliever_status==0){ ?>
+                                            <a class="dropdown-item view_folder" href="<?php echo base_url('Admin/editleaveapplication/'.$k->id)  ?>" ><i class="fa fa-edit"></i> Edit Details</a>
+                                          <!--  <a class="dropdown-item" data-toggle="modal" data-target="#editModal<?php //echo $k->id ?>" id="#editModal"<?php //echo  $k->id; ?> > <i class="fa fa-edit"></i> Edit Details</a> !-->                    
+                                             <div class="dropdown-divider"></div>
+                                             <?php } if($k->leavetype==24){?>
+                                             <a class="dropdown-item" data-toggle="modal" data-target="#writebackModal<?php echo $k->id ?>" id="#writebackModal"<?php echo  $k->id; ?> > <i class="fa fa-edit"></i> Write Back</a>                     
+                                             <div class="dropdown-divider"></div>
+                                             <a class="dropdown-item" data-toggle="modal" data-target="#moreModal<?php echo $k->id ?>" id="#moreModal"<?php echo  $k->id; ?> > <i class="fa fa-eye"></i> View Details</a>                     
+
+                                             <?php }else if($k->reliever_status==0){ ?>
+                                             
+                                             <button onclick="hapus(<?php echo $k->id ?>)" style="width:70px"type="button" class="dropdown-item view_folder"><i class="fas fa-trash"></i> Delete</button>
+                                           <!-- <a class="dropdown-item view_folder" href="<?php  ?>" ><i class="fas fa-trash"></i> Delete</a>!-->
+
+                                        <?php }else { ?>   
+                                             <div class="dropdown-divider"></div>
+                                            <a class="dropdown-item" data-toggle="modal" data-target="#moreModal<?php echo $k->id ?>" id="#moreModal"<?php echo  $k->id; ?> > <i class="fa fa-eye"></i> View Details</a>                     
+                                      <?php } ?>
+                                    
+
+                                    </div>
+                                    </div>
+                                </center>
+                        </td>
+                    </tr>
+
+<!--modal For Approval!-->
+<div class="modal fade" id="moreModal<?php echo $k->id ?>" tabindex="-1" role="dialog" aria-labelledby="#document_modal_title" aria-hidden="true">
+
+<div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel"> Application Details For Application Code:<?php echo $k->application_no ?></h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        <div class="modal-body">
+            <div class="row">
+                <div class="col-sm-12">
+                    <form action="<?php echo base_url('Admin/approveleave/'.$k->id) ;?>" method="post" id="enqry_form"><?php ?>
+                        <div class="row">
+                            <div class="col-sm-6" style="border-right: solid 1px lightgrey">
+                                <!--                                    <input type="hidden" class="form-control" value="--><?php //echo $train_detail->id;?><!--" name="training_id" required ">-->
+
+                                <div class="form-group">
+                                    <label for="leavetype">
+                                    Leave Type
+                                    </label>
+                                    <p><?php echo getLeavetypes($k->leavetype);?></p>
+                                </div>
+                            </div>
+                            <div class="col-sm-6" style="border-right: solid 1px lightgrey">
+                                <input type="hidden" class="form-control" id="did" name="did" ">
+                                <div class="form-group">
+                                    <label>
+                                    Reliever Name
+                                    </label>
+                                    <p><?php echo getNames($k->reliever);?></p>
+                                </div>
+                            </div>
+                            <div class="col-sm-6" style="border-right: solid 1px lightgrey">
+                                <div class="form-group">
+                                    <label for="date_to">
+                                    Start Date
+                                    </label>
+                                    <p><?php 
+                                    $startdate=$k->startdate;
+                                    $start_date=str_replace("/","-",$startdate);
+                                    echo date('d M, Y', strtotime($start_date));?>
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="col-sm-6" style="border-right: solid 1px lightgrey">
+                                <div class="form-group">
+                                    <label for="date_to">
+                                    End Date
+                                    </label>
+                                    <p><?php 
+                                    $enddate=$k->enddate;
+                                    $end_date=str_replace("/","-",$enddate);
+                                    echo date('d M, Y', strtotime($end_date));
+                                    ?>
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="col-sm-6" style="border-right: solid 1px lightgrey">
+                                <div class="form-group">
+                                    <label for="date_to">
+                                    Days
+                                    </label>
+                                    <p><?php echo $k->days;?></p>
+                                </div>
+                            </div>
+                          
+                            <?php if($k->filename!=''){?>
+                                <div class="col-sm-4" style="border-right: solid 1px lightgrey">
+                                <label>
+                                Attached Document
+                                </label>
+                                <div class="form-group">
+                                   
+                                    <a  target="_blank" href="<?php echo base_url().$k->filename;  ?>">View Document</a>
+
+
+                                </div>
+                              
+                            </div>
+
+                           <?php }else{} ?>
+                           <?php if(empty($k->reason)){}else{ ?>
+                            <div class="col-sm-12" style="">
+                                <label>
+                                    Reason
+                                </label>
+                                <div class="form-group">
+                                <p><?php echo $k->reason;?></p>
+
+
+                                </div>
+                              
+                            </div>
+                            <?php } ?>
+                            <?php if(empty($k->handovernotes)){}else{ ?>
+                            <div class="col-sm-12" style="">
+                                <label>
+                                    Hand Over Notes
+                                </label>
+                                <div class="form-group">
+                                <p><?php echo $k->handovernotes;?></p>
+
+
+                                </div>
+                              
+                            </div>
+                            <?php } ?>
+                            <?php if(empty($k->linemanager_remarks)){}else{ ?>
+                            <div class="col-sm-12" style="">
+                                <label>
+                                    Line Manager Remarks
+                                </label>
+                                <div class="form-group">
+                                <p><?php echo $k->linemanager_remarks;?></p>
+
+
+                                </div>
+                              
+                            </div>
+                            <?php } ?>
+                            <?php if($k->status==2){}else{ 
+                                if($k->approval_comment!=""){
+                                ?>
+
+                            <div class="col-sm-6">
+                                <label>
+                                    Approval Comment 
+                                </label>
+                                <div class="form-group">
+                                     <p><?php echo $k->approval_comment;?></p>
+
+
+                                </div>
+                                
+                            </div>
+
+                            <?php }else{} }?>
+                          
+                        </div>
+                        <?php if($k->status==-1){ ?>
+                        <div class="row">
+                           
+                            <div class="col-sm-8" style="border-right: solid 1px lightgrey">
+                           
+                                <label>
+                                    Approval Comment (Optional)
+                                </label>
+                                <div class="form-group">
+
+                                    <textarea rows="2" name="approval_comment" id="approval_comment"  style="width: 100%; max-width: 100%;"   autocomplete="off"></textarea>
+
+                                </div>
+                            </div>
+                            <div class="col-sm-4" style="border-right: solid 1px lightgrey">
+                                <label>
+                                   
+                                </label>
+                                <div class="form-group">
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio" name="approvalstatus" value="2">
+                                        <label class="form-check-label">Approve</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio" name="approvalstatus" value="3">
+                                        <label class="form-check-label">Reject</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <hr>
+                                <div class="text-center">
+                                    <div class="form-group">
+                                        <div class="text-center">
+                                           
+                                            <button type="submit" class="btn btn-primary pull-right" type="submit">Approve</button>
+                                         
+                                        </div>
+                                    </div>
+                                    
+                                </div>
+                            </div>
+
+                        </div>
+                        <?php }?>
+                       
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+ <!--!-->
+ <!-- Edit modal For Approval!-->
+<div class="modal fade" id="editModal<?php echo $k->id ?>" tabindex="-1" role="dialog" aria-labelledby="#document_modal_title" aria-hidden="true">
+
+<div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">Edit Leave Application</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        <div class="modal-body">
+            <div class="row">
+                <div class="col-sm-12">
+                    <form action="<?php echo base_url('Admin/editleave/'.$k->id) ;?>" method="post" id="enqry_form"><?php ?>
+                        <div class="row">
+                            <div class="col-sm-6" style="border-right: solid 1px lightgrey">
+
+                                <div class="form-group">
+                                    <label for="leavetype">
+                                    Leave Type
+                                    </label>
+                                    <select class="form-control" name="leavetype" id="leavetype" required onchange=getLeaveTypedays(this.value)>
+                                        <option value="<?php echo $k->leavetype;?>"><?php echo getLeavetypes($k->leavetype);?></option>
+                                        <?php foreach($leavetypes as $leavetype){?>
+                                        <option value="<?php echo $leavetype->id; ?>"><?php echo $leavetype->leavename ; ?></option>  <?php }?>
+                    
+                                     </select>
+                                </div>
+                            </div>
+                            <input id="editdays_remain" name="editdays_remain" style="display:none"></input>
+                            <div class="col-sm-6" style="border-right: solid 1px lightgrey">
+                                <div class="form-group">
+                                    <label for="date_to">
+                                    Start Date
+                                    </label>
+                                    <input type="text" class="form-control" name="startdate" id="edit_startdate" value="<?php echo $k->startdate;?>">
+                                </div>
+                            </div>
+                            <div class="col-sm-6" style="border-right: solid 1px lightgrey">
+                                <div class="form-group">
+                                    <label for="date_to">
+                                    End Date
+                                    </label>
+                                    <input type="text" class="form-control" name="enddate" id="edit_enddate" value="<?php echo $k->enddate;?>" onchange="getEditNumberofDays()">
+
+                                   
+                                </div>
+                            </div>
+                            <div class="col-sm-6" style="border-right: solid 1px lightgrey">
+                                <div class="form-group">
+                                    <label for="date_to">
+                                    No of Days
+                                    </label>
+                                    <input type="number" class="form-control" readonly  name="days" id="editnoofdays" value="<?php echo $k->days;?>" onchange=getExactEndDate(this.value)>
+
+     
+                                </div>
+                            </div>
+                            <div class="col-sm-6" style="border-right: solid 1px lightgrey">
+                                <input type="hidden" class="form-control" id="did" name="did" ">
+                                <div class="form-group">
+                                    <label>
+                                    Reliever Name
+                                    </label>
+                                    <select class="form-control" name="reliever" required>
+                                        <option value="<?php echo $k->reliever;?>"><?php echo getNames($k->reliever);?></option>
+                                         <?php foreach($relievers as $reliever){?>
+                                        <option value="<?php echo $reliever->id; ?>"><?php echo $reliever->name   .' (' .$reliever->staff_number .')' ; ?></option>  <?php }?>
+                                        
+                                    </select>
+
+                                    
+                                </div>
+                            </div>
+                           
+                            
+                          
+                            <div class="col-sm-6" style="border-right: solid 1px lightgrey">
+                                <label>
+                                    Reason
+                                </label>
+                                <div class="form-group">
+                                <textarea rows="3" name="reason" id="reason"  style="width: 100%; max-width: 100%;"   autocomplete="off"><?php echo $k->reason;?></textarea>
+
+                                </div>
+                              
+                            </div>
+                            <div class="col-sm-6" style="border-right: solid 1px lightgrey">
+                                <label>
+                                    Hand Over Notes
+                                </label>
+                                <div class="form-group">
+                                <textarea rows="3" name="handovernotes" id="handovernotes"  style="width: 100%; max-width: 100%;"   autocomplete="off"><?php echo $k->reason;?></textarea>
+
+                                </div>
+                              
+                            </div>
+                            
+                        </div>
+              
+                        <div class="row">
+                        
+                            <div class="col-sm-12">
+                            <hr>
+                                <div class="text-center">
+                                    <div class="form-group">
+                                        <div class="text-center">
+                                           
+                                            <button type="submit" class="btn btn-primary btnedit" type="submit">Edit</button>
+                                         
+                                        </div>
+                                    </div>
+                                    
+                                </div>
+                            </div>
+
+                        </div>
+                     
+                       
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+ <!--!-->
+
+  <!--Write Back modal For Approval!-->
+<div class="modal fade" id="writebackModal<?php echo $k->id ?>" tabindex="-1" role="dialog" aria-labelledby="#document_modal_title" aria-hidden="true">
+
+<div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">Unpaid Study Leave Application (<?php echo $k->application_no ?>)</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        <div class="modal-body">
+            <div class="row">
+                <div class="col-sm-12">
+                    <form action="<?php echo base_url('Admin/unpaidstudyintent/'.$k->id) ;?>" method="post" id="enqry_form"><?php ?>
+                        <div class="row">
+                         
+                            <div class="col-sm-12" style="border-right: solid 1px lightgrey">
+                                <label>
+                                    Reason
+                                </label>
+                                <div class="form-group">
+                                <textarea rows="10" name="reason" id="reason"  style="width: 100%; max-width: 100%;"   autocomplete="off"></textarea>
+
+                                </div>
+                              
+                            </div>
+                            
+                        </div>
+              
+                        <div class="row">
+                        
+                            <div class="col-sm-12">
+                            <hr>
+                                <div class="text-center">
+                                    <div class="form-group">
+                                        <div class="text-center">
+                                           
+                                            <button type="submit" class="btn btn-primary btnedit" type="submit">Submit</button>
+                                         
+                                        </div>
+                                    </div>
+                                    
+                                </div>
+                            </div>
+
+                        </div>
+                     
+                       
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+ <!--!-->
+
+
+
+                <?php } ?>
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+
+<script>
+  /*jQuery($ => {
+     $("#start_date").on("click", function(){
+    const leavetype = $("#leavetype").val();
+    console.log('Leave Type facts',leavetype);
+          let unavailableDates = ["7-4-2023", "10-4-2023", "22-4-2023","1-5-2023" ,"1-6-2023","29-6-2023","10-10-2023","20-10-2023","12-11-2023","12-12-2023","25-12-2023","26-12-2023"];
+          let isUnavailable = date => $.inArray(`${date.getDate()}-${(date.getMonth() + 1)}-${date.getFullYear()}`, unavailableDates) >= 0;
+          const current_Years = new Date().getFullYear();
+          const lastDay = new Date(current_Years, 11, 31);
+          let dateToday = new Date();
+          console.log('Date Here',dateToday);
+          /*if(leavetype===14){
+           
+            let dateToday = new Date(Date.now() + 12096e5);
+             console.log('I am here now',dateToday);
+           
+          }else{
+            let dateToday = new Date();
+          }
+          $("#start_date").datepicker({
+            dateFormat: "dd/mm/yy",
+            changeMonth: false,
+            changeYear: false,
+            minDate: dateToday,
+            maxDate:lastDay,
+            beforeShowDay: date => {
+      if (isUnavailable(date) || !$.datepicker.noWeekends(date)[0]) {
+        return [false, "", "Unavailable"];
+      } else {
+        return [true, ""];
+      }
+    }
+
+});
+          
+        });
+
+        
+
+        
+    }); */
+
+
+            
+  //let unavailableDates = ["7-4-2023", "30-1-2023", "29-12-2021", "30-12-2021", "31-12-2021", "01-01-2022", "02-01-2022", "03-01-2022", "04-01-2022"];
+ /*let unavailableDates = ["7-4-2023", "10-4-2023", "22-4-2023","1-5-2023" ,"1-6-2023","29-6-2023","10-10-2023","20-10-2023","12-11-2023","12-12-2023","25-12-2023","26-12-2023"];
+  let isUnavailable = date => $.inArray(`${date.getDate()}-${(date.getMonth() + 1)}-${date.getFullYear()}`, unavailableDates) >= 0;
+  
+  const current_Years = new Date().getFullYear();
+  const lastDay = new Date(current_Years, 11, 31);
+  let dateToday = new Date();
+  
+  console.log('LeaveValuedata',leavetype);
+  if(leavetype ===14){
+    //let dateToday = new Date();
+    let dateToday = new Date(Date.now() + 12096e5);
+  }
+
+  $("#start_date").datepicker({
+    dateFormat: "dd/mm/yy",
+   
+
+    changeMonth: false,
+    changeYear: false,
+    minDate: dateToday,
+    maxDate:lastDay,
+    beforeShowDay: date => {
+      if (isUnavailable(date) || !$.datepicker.noWeekends(date)[0]) {
+        return [false, "", "Unavailable"];
+      } else {
+        return [true, ""];
+      }
+    }
+  });
+});
+
+        }*/
+
+   
+  
+</script>
+<script>
+    function submitValues(){
+       
+        var maximum_date=document.getElementById("maximum_date").value;
+        var leavetype=document.getElementById("leavetype").value;
+        //var startdate=document.getElementById("start_date").value;
+        //var enddate=document.getElementByid("end_date").value;
+        var enddate=document.getElementById("end_date").value;
+        var startdate=document.getElementById("start_date").value;
+        var days_remain=document.getElementById("days_remain").value;//Remaining days
+        var days=document.getElementById("noofdays").value //days applied
+        console.log('Days',days);
+        console.log('Remain',days_remain);
+        //alert(enddate);
+       
+
+        if(leavetype==0){
+            alert('Kindly choose a leave type');
+            event.preventDefault(); 
+        }
+        if(enddate < startdate){
+            alert('Kindly note that your start date is greater than end date');
+            event.preventDefault(); 
+        }
+        if(days > days_remain){
+            alert('You have Applied for more days than what you are entitled to.');
+            event.preventDefault();
+        }
+        if(maximum_date===startdate){
+            alert('Kindly note you have another application starting from that date');
+            event.preventDefault();
+        }
+       if(maximum_date===enddate){
+            alert('Kindly note you have another application ending from that date');
+            event.preventDefault();
+        }else{
+
+        }
+      
+    }
+</script>
+
+<script>
+
+</script>
+<script>
+    const selectedData = (item) =>{
+        console.log("This is a test", item);
+    }
+
+    function showHint(str) {
+        if (str.length == 0) {
+            document.getElementById("txtHint").innerHTML = "";
+            return;
+        } else {
+            var xmlhttp = new XMLHttpRequest();
+            xmlhttp.onreadystatechange = function() {
+                if (this.readyState == 4 && this.status == 200) {
+                    // let data = await JSON.parse(this.responseText);
+                     let data = this.responseText;
+                    //console.log("Data",data);
+
+                    const data_display = document.getElementById("txtHint")
+                    // let user_list = document.getElementById("user_list");
+                    // let user_name = document.getElementById("user_name");
+                    // console.log("User list",user_list)
+                    // console.log("User name",user_name)
+
+                    data_display.innerHTML = data;
+                    const inputElement = document.querySelector('#operator_name');
+                    // datadisplay.onClick=selectedData(data);
+
+                    data_display.addEventListener('click', event => {
+                        // const value = event.target.value
+                        console.log("Value", data_display.textContent)
+                        inputElement.value = data_display.textContent;
+                        data_display.style.display='none';
+                    })
+
+
+                    // const listElement = document.getElementById("txtHint");
+
+                    // const itemElements = data.map(item => {
+                    //     const li = document.createElement('li');
+                    //     li.textContent = item;
+                    //     return li;
+                    // });
+
+                    // itemElements.forEach(itemElement => {
+                    //     listElement.appendChild(itemElement);
+                    // });
+
+
+                    // const inputElement = document.querySelector('#operator_name');
+
+                    // inputElement.addEventListener('input', event => {
+                    // const inputValue = event.target.value;
+
+                    // const dataList = JSON.parse(this.responseText);
+                    // console.log("Data", dataList)
+                    // const filteredList = dataList.filter(item => item.includes(inputValue));
+
+                    // const dataListElement = document.getElementById("txtHint");
+
+                    // const itemElements = filteredList.map(item => {
+                    //     const li = document.createElement('li');
+                    //     li.textContent = item;
+                    //     return li;
+                    // });
+
+                    // itemElements.forEach(itemElement => {
+                    //     dataListElement.appendChild(itemElement);
+                    // });
+
+                    // // const dataListContainer = document.querySelector('#data-list-container');
+                    // // dataListContainer.innerHTML = '';
+                    // // dataListContainer.appendChild(dataListElement);
+
+                    // });
+
+                }
+            };
+
+            xmlhttp.open("GET", "http://localhost/hr/Admin/gethint/"+str, true);
+            xmlhttp.send();
+        }
+    }
+</script>
+
+
+<script>
+    function calculatedDays(enddate,startdate){
+
+    var today = enddate;
+    console.log('Reult of date arraybbh',today);
+    today = new Date(today.split('/')[2],today.split('/')[1]-1,today.split('/')[0]);
+    var date2 = startdate;
+    date2 = new Date(date2.split('/')[2],date2.split('/')[1]-1,date2.split('/')[0]);
+    var timeDiff = Math.abs(today.getTime() - date2.getTime());
+    var diffDays = Math.ceil(timeDiff / (1000 * 3600 * 24)); 
+    var days= Math.ceil(timeDiff / (1000 * 3600 * 24))+1; 
+
+    //Start Date
+    var datestartdate =startdate;
+    var datearraystart = datestartdate.split("/");
+    var newdatestart = datearraystart[1] + '/' + datearraystart[0] + '/' + datearraystart[2];
+    const doc=new Date(newdatestart);
+    var startdateday=doc.getDay();
+    console.log('New dates start result',newdatestart);
+    console.log('New dates start result Day partiv',doc.getDay());
+
+    //End date
+    var dateenddate =enddate;
+    var datearrayend = dateenddate.split("/");
+    var newdateend = datearrayend[1] + '/' + datearrayend[0] + '/' + datearrayend[2];
+    const doc_end=new Date(newdateend);
+    var enddateday=doc_end.getDay();
+    console.log('New dates End result',newdateend);
+    console.log('New dates start result Day partiv',doc_end.getDay());
+    var days;
+
+
+    
+  
+    //Code to remove public hoolidays
+    var hdayar = ["4/7/2023", "4/10/2023","5/1/2023","6/1/2023" ,"6/29/2023","10/10/2023","10/20/2023","12/12/2023","25/12/2023","26/12/2023"];
+
+   // var start = $("#start_date").val();
+    var start=date2;
+    var end=today;
+    //end = $("#end_date").val();
+    console.log('End Result',end);
+   
+    currentDate = start;
+    console.log('Start Result',currentDate);
+    between = [];
+
+while (currentDate <= end) {
+    between.push(new Date(currentDate));
+    currentDate.setDate(currentDate.getDate() + 1);
+    
+}
+console.log('between dates', between);
+
+console.log('Days result',days);
+var between_array=[];
+for(var i=0; i<between.length; i++){
+    console.log('Testing dates2',Date.parse(between[i]));
+    var d = new Date(Date.parse(between[i])),
+        month = '' + (d.getMonth() + 1),
+        day = '' + d.getDate(),
+        year = d.getFullYear();
+        myDate = new Date(d).toLocaleDateString('en-US');
+
+    
+    var day_document=new Date(myDate);
+    var day_doc=day_document.getDay();
+    console.log('Day Doc',day_document.getDay());
+    console.log('Testing My Date result',myDate);
+    
+    between_array.push(myDate);
+  
+    //console.log(findCommonElement(between_array ,hdayar));
+
+    if(day_doc===0){
+        console.log('Days before sunday',days);
+        days=days-1;
+        console.log('Days after',days);
+    }
+     if(day_doc===6){
+        console.log('Days before satrurday',days);
+        days=days-1;
+        console.log('Days after',days);
+    }
+    console.log('Testing array Hydar',hdayar[i]);
+  
+   
+}
+for(let i = 0; i < between_array.length; i++) {
+              
+              // Loop for array2
+              for(let j = 0; j < hdayar.length; j++) {
+                   
+                  // Compare the element of each and
+                  // every element from both of the
+                  // arrays
+                  if(between_array[i] === hdayar[j]) {
+                   
+                      // Return if common element found
+                      days=days-1;
+                      //return days;
+                  }
+              }
+          }
+return days;
+
+
+    }
+  
+
+</script>
+
+<script>
+    /*function calculatedDays(enddate,startdate){
+
+    var today = enddate;
+    console.log('Reult of date arraybbh',today);
+    today = new Date(today.split('/')[2],today.split('/')[1]-1,today.split('/')[0]);
+    //today = new Date(today.split('/')[2],today.split('/')[1]-1,today.split('/')[0] ,today.split(' ')[3],today.split(':')[3],today.split(':')[4]);
+    var result=today.split('/')[2];
+    var daydate=result.split(' ')[0]; //Day of the date
+    var daytime=result.split(' ')[1];//Time
+    var dayyear=today.split('/')[0]; //Year 
+    var  daymonth=today.split('/')[1]; //Month
+    var todaydatevalue= daymonth +'/' + daydate + '/' + dayyear + ' ' + daytime;
+   console.log('Formatted date',todaydatevalue);
+    var datevalue=new Date(todaydatevalue);
+
+    var date2 = startdate;
+    //date2 = new Date(date2.split('/')[2],date2.split('/')[1]-1,date2.split('/')[0]);
+    var result2=date2.split('/')[2];
+    var daydate2=result2.split(' ')[0]; //Day of the date
+    var daytime2=result2.split(' ')[1];//Time
+    var dayyear2=date2.split('/')[0]; //Year 
+    var  daymonth2=date2.split('/')[1]; //Month
+
+    var enddatevalue= daymonth2 +'/' + daydate2 + '/' + dayyear2 + ' ' + daytime2;
+    console.log('Formatted date',enddatevalue);
+    var datevalue2=new Date(enddatevalue);
+
+
+
+
+
+
+
+    var timeDiff = Math.abs(datevalue.getTime() - datevalue2.getTime());
+    var diffDays = Math.ceil(timeDiff / (1000 * 3600 * 24)); 
+    var days= Math.ceil(timeDiff / (1000 * 3600 * 24))+1; 
+
+    //Start Date
+    var datestartdate =startdate;
+    var datearraystart = datestartdate.split("/");
+    var newdatestart = datearraystart[2] + '/' + datearraystart[1] + '/' + datearraystart[0];
+    const doc=new Date(newdatestart);
+    var startdateday=doc.getDay();
+    console.log('New dates start result Formatted',newdatestart);
+    console.log('New dates start result Day partiv',doc.getDay());
+
+    //End date
+    var dateenddate =enddate;
+    var datearrayend = dateenddate.split("/");
+    var newdateend = datearrayend[1] + '/' + datearrayend[0] + '/' + datearrayend[2];
+    const doc_end=new Date(newdateend);
+    var enddateday=doc_end.getDay();
+    console.log('New dates End result',newdateend);
+    console.log('New dates start result Day partiv',doc_end.getDay());
+    var days;
+
+
+    
+  
+    //Code to remove public hoolidays
+    var hdayar = ["4/7/2023", "4/10/2023","5/1/2023","6/1/2023" ,"6/29/2023","10/10/2023","10/20/2023","12/12/2023","25/12/2023","26/12/2023"];
+
+   // var start = $("#start_date").val();
+    var start=datevalue;
+    var end=datevalue2;
+    //end = $("#end_date").val();
+    console.log('End Result',end);
+   
+    currentDate = start;
+    console.log('Start Result',currentDate);
+    between = [];
+
+while (currentDate <= end) {
+    between.push(new Date(currentDate));
+    currentDate.setDate(currentDate.getDate() + 1);
+    
+}
+console.log('between dates', between);
+
+console.log('Days result',days);
+var between_array=[];
+for(var i=0; i<between.length; i++){
+    console.log('Testing dates2',Date.parse(between[i]));
+    var d = new Date(Date.parse(between[i])),
+        month = '' + (d.getMonth() + 1),
+        day = '' + d.getDate(),
+        year = d.getFullYear();
+        myDate = new Date(d).toLocaleDateString('en-US');
+
+    
+    var day_document=new Date(myDate);
+    var day_doc=day_document.getDay();
+    console.log('Day Doc',day_document.getDay());
+    console.log('Testing My Date result',myDate);
+    
+    between_array.push(myDate);
+  
+    //console.log(findCommonElement(between_array ,hdayar));
+
+    if(day_doc===0){
+        console.log('Days before sunday',days);
+        days=days-1;
+        console.log('Days after',days);
+    }
+     if(day_doc===6){
+        console.log('Days before satrurday',days);
+        days=days-1;
+        console.log('Days after',days);
+    }
+    console.log('Testing array Hydar',hdayar[i]);
+  
+   
+}
+for(let i = 0; i < between_array.length; i++) {
+              
+              // Loop for array2
+              for(let j = 0; j < hdayar.length; j++) {
+                   
+                  // Compare the element of each and
+                  // every element from both of the
+                  // arrays
+                  if(between_array[i] === hdayar[j]) {
+                   
+                      // Return if common element found
+                      days=days-1;
+                      //return days;
+                  }
+              }
+          }
+return days;
+
+
+    }*/
+  
+
+</script>
+<script>
+    function getDaysdiff(e_date,s_date){
+        var datenddate =e_date;
+        var datearray = datenddate.split("/");
+        var newdateend = datearray[1] + '/' + datearray[0] + '/' + datearray[2];
+        //console.log(newdate);
+
+        var datestartdate =s_date;
+        var datearraystart = datestartdate.split("/");
+        var newdatestart = datearraystart[1] + '/' + datearraystart[0] + '/' + datearraystart[2];
+
+        const date1 = new Date(newdatestart);
+        const date2 = new Date(newdateend);
+        const diffTime =date2 - date1;
+        const diffDays = diffTime / (1000 * 60 * 60 * 24); 
+        //console.log(diffTime + " milliseconds");
+        //console.log(diffDays + " days");
+        return diffDays;
+
+    }
+
+</script>
+
+<script>
+    function getNumberofDays(){
+       
+        var enddate=document.getElementById("end_date").value;
+        var startdate=document.getElementById("start_date").value;
+        var result_date=getDaysdiff(enddate,startdate);
+        if(result_date < 0){
+            alert('You have selected an end date that is small than the start date');
+        }
+
+        
+      
+        var days=calculatedDays(enddate ,startdate);
+      
+        var remaindays=document.getElementById("remain").value;
+        var startradios=document.getElementsByName('startdatemorning');
+        var radios =document.getElementsByName('enddatemorning');
+        var morningvalue;//Start Value
+        var endvalue; //End Value
+        for (var j = 0, length = startradios.length; j < length; j++) {
+            if (startradios[j].checked) {
+                // do whatever you want with the checked radio
+                //alert(startradios[j].value);
+                if(startradios[j].value==='morning'){
+                    morningvalue=1;
+                  
+                }else if(startradios[j].value==='afternoon'){
+                    morningvalue=2;
+                }else if(startradios[j].value==='fullday'){
+                    morningvalue=3;
+                }
+
+                // only one radio can be logically checked, don't check the rest
+                break;
+            }
+
+            
+            }
+
+            for (var i = 0, length = radios.length; i < length; i++) {
+            if (radios[i].checked) {
+                // do whatever you want with the checked radio
+                //alert(radios[i].value);
+                if(radios[i].value==='morning'){
+                    endvalue=1;
+                   
+                }else if(radios[i].value==='afternoon'){
+                    endvalue=2;
+                }else if(radios[i].value==='fullday'){
+                    endvalue=3;
+                }
+
+                // only one radio can be logically checked, don't check the rest
+                break;
+            }
+            }
+
+            if(morningvalue==3 && endvalue==3){
+                //Full Days (Start Date & End Date)
+                var noofdays=document.getElementById("noofdays").value=days;
+            }else  if(morningvalue==3 && endvalue==2){
+                //Full Day Start Date &  Half Day End Date:Afternoon)
+                days=days-0.5;
+                var noofdays=document.getElementById("noofdays").value=days;
+            }else  if(morningvalue==3 && endvalue==1){
+                //Full Day Start Date &  Half Day End Date:Afternoon)
+                days=days-0.5;
+                var noofdays=document.getElementById("noofdays").value=days;
+            }else  if(endvalue==3 && morningvalue==1){
+                //Full Day End Date &  Half Day Start Date:Afternoon)
+                days=days-0.5;
+                var noofdays=document.getElementById("noofdays").value=days;
+            }else  if(endvalue==3 && morningvalue==2){
+                //Full Day End Date &  Half Day Start Date:Afternoon)
+                days=days-0.5;
+                var noofdays=document.getElementById("noofdays").value=days;
+            }else  if(endvalue==2 && morningvalue==2){
+                //Half Day Start Date &  Half Day End Date:Afternoon)
+                if(startdate===enddate){
+                    days=0.5;
+                    var noofdays=document.getElementById("noofdays").value=days;
+                }else{
+                    days=days-1;
+                    var noofdays=document.getElementById("noofdays").value=days;
+                }
+               
+            }else  if(endvalue==1 && morningvalue==1){
+                //Half Day Start Date &  Half Day End Date:Afternoon)
+                if(startdate===enddate){
+                    days=0.5;
+                    var noofdays=document.getElementById("noofdays").value=days;
+                }else{
+                    days=days-1;
+                    var noofdays=document.getElementById("noofdays").value=days;
+                }
+               
+            }
+
+        
+        var days_remain=document.getElementById("days_remain").value;
+        console.log('Remaining days here',days_remain);
+        if( noofdays > days_remain){
+            alert('You have applied for more days than what you are entitled to');
+        }
+       
+     
+
+    }
+</script>
+
+<script>
+    function getEditNumberofDays(){
+        var enddate=document.getElementById("edit_enddate").value;
+        var startdate=document.getElementById("edit_startdate").value;
+        var days=calculatedDays(enddate ,startdate);
+        var noofdays=document.getElementById("editnoofdays").value=days;
+        var remaindays=document.getElementById("remain").value;
+     
+        var days_remain=document.getElementById("days_remain").value;
+        console.log('Remaining days here',days_remain);
+        if( noofdays > days_remain){
+            alert('You have applied for more days than what you are entitled to');
+        }
+       
+     
+
+    }
+</script>
+
+<!--New Code !-->
+
+<script>
+
+/*$(function() {
+   // $("#start_date").datepicker();
+    $("#start_date").click(function(){
+        
+    
+    
+    const current_Years = new Date().getFullYear();
+    const lastDay = new Date(current_Years, 11, 31);
+    var leavetype = $("#leavetype").val();
+      
+        //console.log('Leave type value show',leavetype);
+        if(leavetype==='14'){
+            console.log("Showing here");
+            let dateToday = new Date(Date.now() + 12096e5);
+            jQuery($ => {
+                $("#start_date").datepicker(
+                    {
+                        dateFormat: "dd/mm/yy",
+                        changeMonth: false,
+                        changeYear: false,
+                        minDate: dateToday,
+                        maxDate:lastDay,
+                    }
+                );
+            });
+            
+        }else{
+            let dateToday = new Date();
+            console.log("Its here carer");
+            jQuery($ => {
+                $("#start_date").datepicker(
+                    {
+                        dateFormat: "dd/mm/yy",
+                        changeMonth: false,
+                        changeYear: false,
+                        minDate: dateToday,
+                        maxDate:lastDay,
+                    }
+                );
+            });
+        }
+        
+       
+     
+    
+    }); 
+});
+
+   */
+  
+</script>
+
+<!--End Code ! -->
+
+ <script>
+  jQuery($ => {
+  //let unavailableDates = ["7-4-2023", "30-1-2023", "29-12-2021", "30-12-2021", "31-12-2021", "01-01-2022", "02-01-2022", "03-01-2022", "04-01-2022"];
+ let unavailableDates = ["7-4-2023", "10-4-2023", "22-4-2023","1-5-2023" ,"1-6-2023","29-6-2023","10-10-2023","20-10-2023","12-11-2023","12-12-2023","25-12-2023","26-12-2023"];
+  let isUnavailable = date => $.inArray(`${date.getDate()}-${(date.getMonth() + 1)}-${date.getFullYear()}`, unavailableDates) >= 0;
+ // let dateToday = new Date();
+  var dateToday = new Date(Date.now() + 12096e5);
+  const current_Years = new Date().getFullYear();
+  const lastDay = new Date(current_Years, 11, 31);
+  var leavetype=document.getElementById("leavetype").value;
+  console.log('LeaveType Vlaue',leavetype);
+
+  $("#start_date").datepicker({
+    dateFormat: "dd/mm/yy",
+    changeMonth: false,
+    changeYear: false,
+    minDate: dateToday,
+    maxDate:lastDay,
+    beforeShowDay: date => {
+      if (isUnavailable(date) || !$.datepicker.noWeekends(date)[0]) {
+        return [false, "", "Unavailable"];
+      } else {
+        return [true, ""];
+      }
+    }
+  });
+});
+ </script>
+
+<script>
+   jQuery($ => {
+  //let unavailableDates = ["7-4-2023", "30-1-2023", "29-12-2021", "30-12-2021", "31-12-2021", "01-01-2022", "02-01-2022", "03-01-2022", "04-01-2022"];
+ let unavailableDates = ["7-4-2023", "10-4-2023", "22-4-2023","1-5-2023" ,"1-6-2023","29-6-2023","10-10-2023","20-10-2023","12-11-2023","12-12-2023","25-12-2023","26-12-2023"];
+  let isUnavailable = date => $.inArray(`${date.getDate()}-${(date.getMonth() + 1)}-${date.getFullYear()}`, unavailableDates) >= 0;
+  //let dateToday = new Date();
+  var dateToday = new Date(Date.now() + 12096e5);
+  const current_Years = new Date().getFullYear();
+  const lastDay = new Date(current_Years, 11, 31);
+  var leavetype=document.getElementById("leavetype").value;
+  console.log('LeaveType Vlaue',leavetype);
+
+  $("#end_date").datepicker({
+    dateFormat: "dd/mm/yy",
+    changeMonth: false,
+    changeYear: false,
+    minDate: dateToday,
+    maxDate:lastDay,
+    beforeShowDay: date => {
+      if (isUnavailable(date) || !$.datepicker.noWeekends(date)[0]) {
+        return [false, "", "Unavailable"];
+      } else {
+        return [true, ""];
+      }
+    }
+  });
+});
+ </script>
+<script>
+   jQuery($ => {
+  //let unavailableDates = ["7-4-2023", "30-1-2023", "29-12-2021", "30-12-2021", "31-12-2021", "01-01-2022", "02-01-2022", "03-01-2022", "04-01-2022"];
+ let unavailableDates = ["7-4-2023", "10-4-2023", "22-4-2023","1-5-2023" ,"1-6-2023","29-6-2023","10-10-2023","20-10-2023","12-11-2023","12-12-2023","25-12-2023","26-12-2023"];
+  let isUnavailable = date => $.inArray(`${date.getDate()}-${(date.getMonth() + 1)}-${date.getFullYear()}`, unavailableDates) >= 0;
+  let dateToday = new Date();
+  const current_Years = new Date().getFullYear();
+  const lastDay = new Date(current_Years, 11, 31);
+
+  $("#edit_startdate").datepicker({
+    dateFormat: "dd/mm/yy",
+    changeMonth: false,
+    changeYear: false,
+    minDate: dateToday,
+    maxDate:lastDay,
+    beforeShowDay: date => {
+      if (isUnavailable(date) || !$.datepicker.noWeekends(date)[0]) {
+        return [false, "", "Unavailable"];
+      } else {
+        return [true, ""];
+      }
+    }
+  });
+});
+ </script>
+ <script>
+   jQuery($ => {
+  //let unavailableDates = ["7-4-2023", "30-1-2023", "29-12-2021", "30-12-2021", "31-12-2021", "01-01-2022", "02-01-2022", "03-01-2022", "04-01-2022"];
+ let unavailableDates = ["7-4-2023", "10-4-2023", "22-4-2023","1-5-2023" ,"1-6-2023","29-6-2023","10-10-2023","20-10-2023","12-11-2023","12-12-2023","25-12-2023","26-12-2023"];
+  let isUnavailable = date => $.inArray(`${date.getDate()}-${(date.getMonth() + 1)}-${date.getFullYear()}`, unavailableDates) >= 0;
+  let dateToday = new Date();
+  const current_Years = new Date().getFullYear();
+  const lastDay = new Date(current_Years, 11, 31);
+
+  $("#edit_enddate").datepicker({
+    dateFormat: "dd/mm/yy",
+    changeMonth: false,
+    changeYear: false,
+    minDate: dateToday,
+    maxDate:lastDay,
+    beforeShowDay: date => {
+      if (isUnavailable(date) || !$.datepicker.noWeekends(date)[0]) {
+        return [false, "", "Unavailable"];
+      } else {
+        return [true, ""];
+      }
+    }
+  });
+});
+ </script>
+
+
+
+
+
+
+
+
+
+<script>
+
+//const today = new Date();
+//console.log(today);
+/*const today=2023-01-17;
+var next = new Date(today.getTime());
+next.setDate(next.getDate()+5); // tomorrow
+while (next.getDay() == 6 || next.getDay() == 0) next.setDate(next.getDate() + 1);
+console.log(next);
+console.log("-------");*/
+</script>
+
+<script>
+    function applyleave(){
+        var createleave=document.getElementById("frmapplication")
+        if(createleave.style.display=='none'){
+            createleave.style.display = 'block'; 
+        }else{
+            createleave.style.display = 'none'; 
+        }
+    }
+</script>
+
+<script>
+   
+   
+
+</script>
+
+<script>
+    function getExactEndDate(str){
+          //Check the Limit
+        var noofdays=document.getElementById("remain").innerHTML;  
+       
+        if(str > noofdays){
+            console.log('The Value is higher');
+            limitvalue.style.display = 'block'; 
+        }else{
+            limitvalue.style.display = 'none'; 
+        }
+
+
+        var datefrom = document.getElementById("startdate").value.toString();
+        var today = new Date(datefrom);//Start Date
+        console.log(today);
+       
+        var tomorrow = new Date(today);
+      
+       
+        
+        tomorrow.setDate(today.getDate() + parseFloat(str) );
+        tomorrow.toLocaleDateString();
+        var dd = new Date(tomorrow); // or any date and time you care about
+        var dateArray = dd.toISOString().split('T')[0].split('-').concat(dd.toISOString().split('T')[1].split(':'))
+      
+        tomorrow = dateArray[0] + "-" + dateArray[1] + "-" + dateArray[2]
+        console.log("End Date", tomorrow)
+        document.getElementById("enddate").value=tomorrow
+
+      
+        
+
+    }
+</script>
+<script>
+function getLeaveTypedays(str){
+   
+  
+    if (str.length == 0) {
+            document.getElementById("leavetype").innerHTML = "";
+            return;
+        } else {
+            var xmlhttp = new XMLHttpRequest();
+            xmlhttp.onreadystatechange = function() {
+                if (this.readyState == 4 && this.status == 200) {
+                    //var edays= document.getElementById("edays");
+                    //var rdays=document.getElementById("rdays");
+                    const newdata=[this.responseText]
+                    console.log(newdata);
+                    var noofdays=document.getElementById("remainingdays");
+                    var days_remain=document.getElementById("days_remain");
+                    var entitleddays=document.getElementById("entitled_days");
+                    var editdays_remain=document.getElementById("editdays_remain");
+                    var remain=document.getElementById("remain");
+                    var result= newdata.toString().split(',')[0].trim();
+                    //noofdays.innerHTML= 'Earned/Remaining Days '+result;
+                    days_remain.value=result;
+                    //editdays_remain.value=result;
+                    console.log(entitleddays);
+                    entitleddays.value=result;
+
+                    console.log('Testing data',noofdays);
+                    remain.innerHTML=newdata;
+                   
+                    var narration= newdata.toString().split(',')[1].trim();
+                    var leavenarration=document.getElementById("leavenarration");
+                    var tonote=document.getElementById("tonote");
+                    if(narration!==''){
+                        tonote.style.display = 'block'; 
+                    }else{
+                        tonote.style.display = 'none'; 
+                    }
+                    
+                    leavenarration.innerHTML=narration;
+                    console.log(narration);
+                    var divsection=document.getElementById("carersboxes");
+                    var fortnightAway = new Date(Date.now() - 12096e5);
+                    if(str==14){
+                        
+
+                    }
+                    if(str==18){
+                       
+                        if(divsection){
+                            divsection.style.display='block';
+                        }
+                      
+                     
+                        var xmlhttps=new XMLHttpRequest();
+                        xmlhttps.onreadystatechange = function() {
+                            if (this.readyState == 4 && this.status == 200) {
+                                const dataresult=[this.responseText];
+                                const myArray=dataresult[0].split(",");
+                                console.log(myArray.length);
+                               // console.log("Data of Carrere",dataresult);
+                              
+                              if(dataresult!=''){
+
+                              
+                               console.log(dataresult.length);
+
+                                var myDiv = document.getElementById("cboxes");
+
+                                for (var i = 0; i < myArray.length; i++) {
+                                    var checkBox = document.createElement("input");
+                                    var label = document.createElement("label");
+                                    checkBox.type = "checkbox";
+                                    checkBox.value = myArray[i];
+                                    checkBox.className = "beneficiaries_id";
+                                    checkBox.name="beneficiaries_id[]";
+                                    myDiv.appendChild(checkBox);
+                                    myDiv.appendChild(label);
+                                    label.appendChild(document.createTextNode(myArray[i]));
+                                }
+                                console.log("My Div",myDiv);
+                                console.log("My Checkbox value",checkBox);
+                            }
+                        }
+                        }
+                        xmlhttps.open("GET", "http://localhost/hr/admin/getbeneficiaries", true);
+                        xmlhttps.send();
+                    }
+                    else{
+                        divsection.style.display='none';
+                        document.getElementById("cboxes").innerHTML = "";
+                     }
+                  
+                    
+                    var attachdocument=document.getElementById("attachdocument");
+                    var labelattachdocument=document.getElementById("labelattachdocument");
+                    if(str==16 || str==21 || str==25 || str==18 || str==20){
+                        attachdocument.style.display = 'block'; 
+                        if(str==16){
+                            labelattachdocument.innerHTML="Attach Card";
+                        }else if(str==20){
+                            labelattachdocument.innerHTML="Attach Antenatal card";
+                        }else if(str==21){
+                            labelattachdocument.innerHTML="Attach Birth notification";
+                        }else if(str==25){
+                            labelattachdocument.innerHTML="Attach Examination Timetable or Admission Form/Examination registration";
+                        }else if(str==18){
+                            labelattachdocument.innerHTML="Attach Evidence of hospitalization";
+                        }else{
+                            labelattachdocument.innerHTML="Attach Document";
+                        }
+                        
+                    }else{
+                        attachdocument.style.display = 'none'; 
+                    }
+                        var today = new Date().toISOString().split('T')[0];
+   
+                        if(str==16 ||str==23){
+                            
+                        }else{
+                           // document.getElementsByName("startdate")[0].setAttribute('min', today);
+                        }
+                 
+                  
+                }
+            }
+
+            xmlhttp.open("GET", "http://localhost/hr/admin/getEntitledDays/" +str, true);
+            xmlhttp.send();
+
+
+       
+           
+        }
+
+    }
+  
+</script>
+
+
+<script>
+    
+       /*  jQuery($ => {
+  //let unavailableDates = ["7-4-2023", "30-1-2023", "29-12-2021", "30-12-2021", "31-12-2021", "01-01-2022", "02-01-2022", "03-01-2022", "04-01-2022"];
+ let unavailableDates = ["7-4-2023", "10-4-2023", "22-4-2023","1-5-2023" ,"1-6-2023","29-6-2023","10-10-2023","20-10-2023","12-11-2023","12-12-2023","25-12-2023","26-12-2023"];
+  let isUnavailable = date => $.inArray(`${date.getDate()}-${(date.getMonth() + 1)}-${date.getFullYear()}`, unavailableDates) >= 0;
+  
+  const current_Years = new Date().getFullYear();
+  const lastDay = new Date(current_Years, 11, 31);
+  let dateToday = new Date();
+  const leavetype = $("#leavetype").val();
+  console.log('LeaveValuedata',leavetype);
+  if(leavetype ===14){
+    //let dateToday = new Date();
+    let dateToday = new Date(Date.now() + 12096e5);
+  }
+
+  $("#start_date").datepicker({
+    dateFormat: "dd/mm/yy",
+   
+
+    changeMonth: false,
+    changeYear: false,
+    minDate: dateToday,
+    maxDate:lastDay,
+    beforeShowDay: date => {
+      if (isUnavailable(date) || !$.datepicker.noWeekends(date)[0]) {
+        return [false, "", "Unavailable"];
+      } else {
+        return [true, ""];
+      }
+    }
+  });
+});*/
+
+            //End of New Code
+</script>
+
+
+
+<script>
+    function hapus(id) {  
+      
+  swal.fire({
+        title: 'Are you sure?',
+        text: "Are you sure you want to proceed ?",
+        type: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Yes'
+    }).then(function(result) { 
+        if (result.value) {
+            $.ajax({
+                
+                type : 'POST',
+                url: "http://localhost/hr/admin/delete/" +id,
+                
+               
+                beforeSend: function() {
+                    swal.fire({
+                        title: 'Please Wait..!',
+                        text: 'Is working..',
+                        onOpen: function() {
+                            swal.showLoading()
+                        }
+                    })
+                   // console.log(url);
+                },
+                success : function(data) { 
+                    
+                    swal.fire({
+                        position: 'top-right',
+                        type: 'success',
+                        title: 'Application  deleted successfully',
+                        showConfirmButton: false,
+                      
+                    });
+                 },
+                complete: function() {
+                    swal.hideLoading();
+                    location.reload();
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    swal.hideLoading();
+                    swal.fire("!Opps ", "Something went wrong, try again later", "error");
+                }
+            });
+        }
+    });
+}
+</script>
+
