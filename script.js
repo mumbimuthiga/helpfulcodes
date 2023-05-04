@@ -41,4 +41,4 @@ var buttonCommon = {
 
 
 // In the table add this part
-<table class="table table-bordered" id="myTable" width="100%" cellspacing="0" data-export-title="write the name of the file as you want it downloaded">
+<table class="table table-bordered" id="myTable" width="100%" cellspacing="0" data-export-title="write the name of the file as you want it downloaded in your pc">
