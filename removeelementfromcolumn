@@ -1,2 +1,3 @@
-
+//This file remove the prefix Mr before name in the column name in mysql
 UPDATE staff_details SET name = REPLACE(name, 'Ms.', '') WHERE name LIKE '%Ms%';
+UPDATE staff_details SET name = REPLACE(name, 'Mr.', '') WHERE name LIKE '%Mr%';
