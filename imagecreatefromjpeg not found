@@ -1,3 +1,3 @@
-Problem :call_user_func(): Argument #1 ($callback) must be a valid callback, function "imagecreatefromjpeg" not found or invalid function name
+Problem at hand :call_user_func(): Argument #1 ($callback) must be a valid callback, function "imagecreatefromjpeg" not found or invalid function name
 Edit the extension in php.ini
 remove the comment under extension=gd
