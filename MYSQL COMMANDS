@@ -1,1 +1,5 @@
 Return the first non-null value in a list: SELECT COALESCE(NULL, NULL, NULL, 'W3Schools.com', NULL, 'Example.com');  Result: W3Schools.com
+SELECT OrderID, Quantity, IIF(Quantity>10, 'MORE', 'LESS') FROM OrderDetails; 
+Results
+10248	12	MORE
+10248	10	LESS
